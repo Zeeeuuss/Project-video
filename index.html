@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Blind Sitting for Humanoid Robots with a Contact-Conditioned Generative Motion Prior</title>
+<style>
+  :root{
+    --ink:#1c1e21;
+    --ink-soft:#55595f;
+    --accent:#2f4f8f;
+    --accent-soft:#eef2fa;
+    --line:#e6e8eb;
+    --bg:#ffffff;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --serif:Georgia,"Times New Roman","Songti SC","Noto Serif SC",serif;
+    --sans:-apple-system,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{background:var(--bg);color:var(--ink);font-family:var(--sans);line-height:1.75;}
+  .wrap{max-width:1000px;margin:0 auto;padding:0 20px;}
+
+  /* ---------- Hero ---------- */
+  header{padding:60px 0 10px;text-align:center;}
+  h1{
+    font-family:var(--serif);font-weight:700;
+    font-size:clamp(24px,3.6vw,36px);line-height:1.4;letter-spacing:.2px;
+    max-width:860px;margin:0 auto;
+  }
+  .authors{margin-top:20px;font-size:16.5px;}
+  .authors .me{color:var(--accent);font-weight:600;}
+  .affil{color:var(--ink-soft);font-size:14.5px;margin-top:6px;}
+  .venue{
+    display:inline-block;margin-top:16px;font-family:var(--mono);font-size:13px;
+    color:var(--accent);background:var(--accent-soft);border-radius:6px;padding:3px 14px;
+  }
+
+  /* ---------- 分区通用 ---------- */
+  section{padding:42px 0 4px;}
+  .eyebrow{
+    font-family:var(--mono);font-size:12.5px;letter-spacing:2.5px;
+    color:var(--accent);text-transform:uppercase;margin-bottom:8px;
+  }
+  h2{font-family:var(--serif);font-size:24px;font-weight:700;margin-bottom:14px;}
+  .lede{color:var(--ink-soft);font-size:15.5px;margin-bottom:20px;}
+  .method-list{list-style:none;margin:0 0 22px;color:var(--ink-soft);font-size:15.5px;}
+  .method-list li{padding-left:1.2em;position:relative;margin-bottom:6px;}
+  .method-list li::before{content:"·";position:absolute;left:.3em;color:var(--accent);font-weight:700;}
+  .formula{
+    font-family:var(--serif);font-style:italic;color:var(--ink);
+    background:var(--accent-soft);border-radius:4px;padding:1px 8px;white-space:nowrap;
+  }
+  .formula sup,.formula sub{font-size:11px;font-style:normal;}
+  hr.sep{border:none;border-top:1px solid var(--line);margin:46px auto 0;max-width:1000px;}
+
+  /* ---------- 视频 ---------- */
+  video{width:100%;display:block;border-radius:10px;background:#0d0f12;}
+  .vid-card{display:flex;flex-direction:column;gap:8px;}
+  .vid-cap{font-size:14px;color:var(--ink-soft);text-align:center;line-height:1.55;}
+  .vid-cap .m{font-family:var(--mono);color:var(--ink);background:var(--accent-soft);
+    border-radius:4px;padding:0 6px;font-size:13px;white-space:nowrap;}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+  .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+  @media(max-width:760px){
+    .grid-2{grid-template-columns:1fr;}
+    .grid-4{grid-template-columns:repeat(2,1fr);}
+  }
+  .vid-fallback{
+    display:none;aspect-ratio:16/9;border-radius:10px;border:1.5px dashed #c9ced6;
+    background:#f7f8fa;color:var(--ink-soft);font-size:13px;
+    align-items:center;justify-content:center;text-align:center;padding:16px;
+    font-family:var(--mono);line-height:1.6;
+  }
+  .vid-fallback.portrait{aspect-ratio:9/16;}
+  .vid-wrap.failed video{display:none;}
+  .vid-wrap.failed .vid-fallback{display:flex;}
+
+  /* ---------- 方法图 ---------- */
+  .figure img{width:100%;border-radius:8px;border:1px solid var(--line);display:block;background:#fff;}
+  .fig-cap{font-size:14px;color:var(--ink-soft);text-align:center;margin-top:10px;}
+
+  /* ---------- 无椅对比区 ---------- */
+  .compare{
+    border:1px solid var(--line);border-radius:14px;padding:24px;
+    background:linear-gradient(180deg,#fafbfd,#fff);
+  }
+  .tag{
+    display:inline-block;font-size:13px;font-family:var(--mono);
+    border-radius:5px;padding:2px 10px;margin-bottom:8px;
+  }
+  .tag.ours{background:var(--accent);color:#fff;}
+  .tag.base{background:#e9eaee;color:var(--ink-soft);}
+  .sync-btn{
+    margin:18px auto 0;display:flex;align-items:center;gap:8px;
+    background:transparent;border:1px solid var(--accent);color:var(--accent);
+    border-radius:999px;padding:7px 22px;font-size:14.5px;cursor:pointer;
+    font-family:var(--sans);transition:background .15s,color .15s;
+  }
+  .sync-btn:hover{background:var(--accent);color:#fff;}
+  .sync-btn:focus-visible{outline:2px solid var(--accent);outline-offset:3px;}
+
+  /* ---------- 页脚 ---------- */
+  footer{padding:44px 0 56px;color:var(--ink-soft);font-size:14px;text-align:center;}
+  footer a{color:var(--accent);text-decoration:none;}
+</style>
+</head>
+<body>
+
+<!-- ① 标题区 -->
+<header class="wrap">
+  <h1>Blind Sitting for Humanoid Robots with a<br>Contact-Conditioned Generative Motion Prior</h1>
+  <div class="authors">
+    <span class="me">Zetao Yan</span><sup>1,2</sup>,
+    Dongqi Wang<sup>1</sup>, Haodong Zhang<sup>1</sup>, Liang Zhang<sup>2</sup>,
+    Xingwen Zheng<sup>1</sup>, Rong Xiong<sup>1,2</sup>
+  </div>
+  <div class="affil"><sup>1</sup>浙江大学 &nbsp;·&nbsp; <sup>2</sup>浙江人形机器人创新中心</div>
+  <span class="venue">IEEE ROBIO 2026 · 在审</span>
+</header>
+
+<hr class="sep">
+
+<!-- ② 方法 -->
+<section class="wrap">
+  <div class="eyebrow">Method</div>
+  <h2>方法框架</h2>
+  <p class="lede" style="margin-bottom:10px;">面向未知椅高的人形机器人盲式坐下:</p>
+  <ul class="method-list">
+    <li>力转移率估计器仅凭本体感知历史,在线估计支撑力从双脚向髋部转移的比例
+      <span class="formula">r&nbsp;=&nbsp;F<sup>z</sup><sub>hip</sub>&nbsp;/&nbsp;(F<sup>z</sup><sub>feet</sub>&nbsp;+&nbsp;F<sup>z</sup><sub>hip</sub>)</span></li>
+    <li>接触条件化的动作生成模型 C-GMP 根据接触信息生成下蹲或就座动作</li>
+    <li>接触触发使相位切换始终与真实支撑转移对齐,相比预定义接触序列,髋部接触冲量降低 64%</li>
+  </ul>
+  <div class="figure">
+    <img src="https://zeeeuuss.github.io/Project-video/Static/Images/Fig1.png"
+         alt="接触触发盲式坐下系统框架图"
+         onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+    <div class="vid-fallback" style="aspect-ratio:2/1;">Fig1.png<br>(预览沙箱可能拦截外链图片,部署后正常)</div>
+  </div>
+</section>
+
+<!-- ③ 仿真实验 -->
+<section class="wrap">
+  <div class="eyebrow">Simulation</div>
+  <h2>仿真实验</h2>
+  <div class="grid-2">
+    <div class="vid-wrap vid-card">
+      <video autoplay muted loop playsinline controls
+        src="https://zeeeuuss.github.io/Project-video/Static/Video/chair_0_4.mp4"></video>
+      <div class="vid-fallback">chair_0_4.mp4</div>
+      <div class="vid-cap">仿真椅高度 <span class="m">0.40 m</span></div>
+    </div>
+    <div class="vid-wrap vid-card">
+      <video autoplay muted loop playsinline controls
+        src="https://zeeeuuss.github.io/Project-video/Static/Video/chair_0_5.mp4"></video>
+      <div class="vid-fallback">chair_0_5.mp4</div>
+      <div class="vid-cap">仿真椅高度 <span class="m">0.50 m</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ④ 真机实验 -->
+<section class="wrap">
+  <div class="eyebrow">Real-World</div>
+  <h2>真机实验</h2>
+  <p class="lede">在 Naviai-i2 上部署,实现在日常四把椅子的坐下动作。</p>
+  <div class="grid-4">
+    <div class="vid-wrap vid-card">
+      <video autoplay muted loop playsinline controls
+        src="https://zeeeuuss.github.io/Project-video/Static/Video/9391.mp4"></video>
+      <div class="vid-fallback portrait">9391.mp4</div>
+      <div class="vid-cap">椅高 <span class="m">0.38 m</span><br>海绵垫椅面</div>
+    </div>
+    <div class="vid-wrap vid-card">
+      <video autoplay muted loop playsinline controls
+        src="https://zeeeuuss.github.io/Project-video/Static/Video/9386.mp4"></video>
+      <div class="vid-fallback portrait">9386.mp4</div>
+      <div class="vid-cap">椅高 <span class="m">0.40 m</span><br>粗织物椅面</div>
+    </div>
+    <div class="vid-wrap vid-card">
+      <video autoplay muted loop playsinline controls
+        src="https://zeeeuuss.github.io/Project-video/Static/Video/9390.mp4"></video>
+      <div class="vid-fallback portrait">9390.mp4</div>
+      <div class="vid-cap">椅高 <span class="m">0.43 m</span><br>海绵垫椅面</div>
+    </div>
+    <div class="vid-wrap vid-card">
+      <video autoplay muted loop playsinline controls
+        src="https://zeeeuuss.github.io/Project-video/Static/Video/9833.mp4"></video>
+      <div class="vid-fallback portrait">9833.mp4</div>
+      <div class="vid-cap">椅高 <span class="m">0.46 m</span><br>粗织物椅面</div>
+    </div>
+  </div>
+</section>
+
+<!-- ⑤ 无椅测试 -->
+<section class="wrap">
+  <div class="eyebrow">No-Chair Test</div>
+  <h2>无椅测试</h2>
+  <p class="lede" style="margin-bottom:10px;">环境中不存在椅子:</p>
+  <ul class="method-list">
+    <li>接触触发方案由于未检测到接触,维持蹲姿不卸力</li>
+    <li>预定义接触序列(WoCoCo)盲目卸力导致摔倒</li>
+  </ul>
+  <div class="compare">
+    <div class="grid-2">
+      <div class="vid-wrap vid-card">
+        <span class="tag ours">接触触发(Ours)</span>
+        <video muted loop playsinline controls
+          src="https://zeeeuuss.github.io/Project-video/Static/Video/no_chair.mp4"></video>
+        <div class="vid-fallback">no_chair.mp4</div>
+      </div>
+      <div class="vid-wrap vid-card">
+        <span class="tag base">预定义接触序列(WoCoCo)</span>
+        <video muted loop playsinline controls
+          src="https://zeeeuuss.github.io/Project-video/Static/Video/no_chair_wococo.mp4"></video>
+        <div class="vid-fallback">no_chair_wococo.mp4</div>
+      </div>
+    </div>
+    <button class="sync-btn" id="syncBtn">▶ 从头同步播放两侧视频</button>
+  </div>
+</section>
+
+<!-- ⑥ 页脚 -->
+<footer class="wrap">
+  言泽涛 · <a href="mailto:22432163@zju.edu.cn">22432163@zju.edu.cn</a>
+</footer>
+
+<script>
+  document.querySelectorAll('.vid-wrap video').forEach(function(v){
+    v.addEventListener('error', function(){ v.closest('.vid-wrap').classList.add('failed'); }, true);
+  });
+  var btn = document.getElementById('syncBtn');
+  if(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('.compare video').forEach(function(v){
+        v.currentTime = 0; v.play();
+      });
+    });
+  }
+</script>
+</body>
+</html>
